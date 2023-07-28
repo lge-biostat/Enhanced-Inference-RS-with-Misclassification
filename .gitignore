@@ -1,4 +1,4 @@
 README_files/
-README.Rmd
-.DS_Store
-.gitignore
+**/*.Rmd
+**/.DS_Store
+**/.gitignore
