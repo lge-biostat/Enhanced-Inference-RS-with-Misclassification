@@ -2,3 +2,4 @@ README_files/
 **/*.Rmd
 **/.DS_Store
 **/.gitignore
+.DS_Store
