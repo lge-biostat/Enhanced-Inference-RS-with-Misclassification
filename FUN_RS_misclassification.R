@@ -10,6 +10,11 @@
 ## A function to simulate individual level imperfect testing data based on 
 ## pre-specified parameters
 
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+library(viridis)
+
 simu_sym_RS = function(N,N_true,p.RS,Se,Sp){
   
   ## Parameters
@@ -42,7 +47,7 @@ simu_sym_RS = function(N,N_true,p.RS,Se,Sp){
 
 ## A function for the proposed Bayesian Credible interval approach
 
-RS_BC = function(N=1, n_pos.RS,n.RS,Se,Sp){
+RS_BC = function(N,n_pos.RS,n.RS,Se,Sp){
   
   ## Parameters
   ## N: total population size (N=1, output the BC for prevalence estimator;
@@ -76,16 +81,20 @@ RS_BC = function(N=1, n_pos.RS,n.RS,Se,Sp){
   p_true_post = (p_true_post+Sp-1)/(Se+Sp-1)
   
   # calculate the BC interval
-  # N=1, we calculate the BC for prevalence estimator
-  # N=Ntot, we calculate the BC for case count estimator
-  N_iter = N*p_true_post
+  # Ntot=1, we calculate the BC for prevalence estimator
+  # Ntot=N, we calculate the BC for case count estimator
+  Ntot = 1
+  N_iter = Ntot*p_true_post
   
   N_iter_lower = max(quantile(N_iter,c(0.025)),0)
   N_iter_upper = max(quantile(N_iter,c(0.975)),0)
   
   N_iter_interval_width = N_iter_upper - N_iter_lower
   
-  return(list(BC_lower = N_iter_lower,BC_upper = N_iter_upper,BC_width = N_iter_interval_width))
+  N_iter_median = max(quantile(N_iter,c(0.5)),0)
+  
+  return(list(BC_lower = N_iter_lower,BC_upper = N_iter_upper,BC_width = N_iter_interval_width,
+              BC_median = N_iter_median))
 }
 
 
@@ -149,4 +158,67 @@ coverage_wald = function(est.vec,N_truth){
   }
   
   return(list(width = N_width,coverage = N_coverage, lower = lower, upper = upper))
+}
+
+
+## A function to calculate three types of standard errors
+
+RS_SE_compare = function(N, p_case, p.RS, Se, Sp){
+  
+  ## Parameters
+  ## N: total population size
+  ## p_case: true disease prevalence
+  ## p.RS: the sampling rate for random samples
+  ## Se: Sensitivity of the testing tool
+  ## Sp: Specificity of the testing tool
+  
+  # first N*p_case individual: case; remaining: health
+  N_true = c(rep(1,round(N*p_case)),rep(0,round(N*(1-p_case)))) 
+  
+  # generate data set
+  simu2 = simu_sym_RS(N,N_true,p.RS,Se,Sp)
+  test2 = simu2$test
+  testpos2 = simu2$testpos
+  
+  # RS method
+  n_stream2 = sum(test2) 
+  n_pos_stream2 = max(sum(testpos2),0.001)
+  
+  # calculate the estimate of test positive frequency ("pi" in paper) and the 
+  # bias-corrected disease prevalence ("pi_c" in paper) with threshold [0, 1]
+  p_star_RS = n_pos_stream2/n_stream2
+  p_RS = max((p_star_RS+Sp-1)/(Se+Sp-1),0)
+  
+  # three types of standard errors
+  fpc2 = n_stream2*(N-n_stream2)/(N*(n_stream2-1))
+  V_pi_star0 = p_star_RS*(1-p_star_RS)/n_stream2
+  V_pi_star1 = V_pi_star0*fpc2
+  V_pi_star2 = (p_RS*Se*(1-Se) + (1-p_RS)*Sp*(1-Sp))/N
+  
+  p_RS_se1 = 1/(Se+Sp-1)*sqrt(V_pi_star0)
+  p_RS_Se2 = 1/(Se+Sp-1)*sqrt(V_pi_star1)
+  p_RS_se3 = 1/(Se+Sp-1)*sqrt(V_pi_star1+V_pi_star2)
+  
+  return(c(p_RS,p_RS_se1,p_RS_Se2,p_RS_se3))
+}
+
+
+## A function to evaluate the three types of averaged standard errors and "true variance"
+
+RS_SE_compare_main = function(N, p_case, p.RS, Se, Sp){
+  
+  ## Parameters
+  ## N: total population size
+  ## p_case: true disease prevalence
+  ## p.RS: the sampling rate for random samples
+  ## Se: Sensitivity of the testing tool
+  ## Sp: Specificity of the testing tool
+  
+  n_sim = 50000
+  result = replicate(n=n_sim, RS_SE_compare(N, p_case, p.RS, Se, Sp))
+  p_RS_sd=sd(result[1,])
+  p_RS_se1=mean(result[2,])
+  p_RS_Se=mean(result[3,])
+  p_RS_se3=mean(result[4,])
+  return(c(p_RS_sd,p_RS_se1,p_RS_Se,p_RS_se3))
 }
