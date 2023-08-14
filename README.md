@@ -69,10 +69,10 @@ n_pos.RS = max(sum(testpos.RS),0.001)
 c(n.RS, n_pos.RS)
 ```
 
-    ## [1] 200  26
+    ## [1] 200  24
 
 Here we generate a imperfect testing data set with size 200 and among
-this data set, 26 people are observed positive test results.
+this data set, 24 people are observed positive test results.
 
 ## Data Analysis
 
@@ -88,7 +88,7 @@ pi_hat_c = max((pi_hat+Sp-1)/(Se+Sp-1),0)
 c(pi_hat, pi_hat_c)
 ```
 
-    ## [1] 0.13000000 0.09411765
+    ## [1] 0.12000000 0.08235294
 
 as well as three types of standard errors of
 ![\hat{\pi}](https://latex.codecogs.com/png.latex?%5Chat%7B%5Cpi%7D "\hat{\pi}")
@@ -109,7 +109,7 @@ V3_pi = V2_pi+V_pi_extra
 sqrt(c(V1_pi, V2_pi, V3_pi))
 ```
 
-    ## [1] 0.02378024 0.02132307 0.02249830
+    ## [1] 0.02297825 0.02060395 0.02180648
 
 By inserting eqn.(1), (2), (12) into eqn. (6), we could obtain three
 types of standard errors of
@@ -121,7 +121,7 @@ se.vect = 1/(Se+Sp-1)*sqrt(c(V1_pi, V2_pi, V3_pi))
 se.vect
 ```
 
-    ## [1] 0.02797676 0.02508597 0.02646858
+    ## [1] 0.02703324 0.02423994 0.02565468
 
 Then we can output the wald-type 95% CIs as well as their width based on
 three standard erros as follows.
@@ -131,21 +131,21 @@ three standard erros as follows.
 c(pi_hat_c-1.96*se.vect[1],pi_hat_c+1.96*se.vect[1], 2*1.96*se.vect[1])
 ```
 
-    ## [1] 0.0392832 0.1489521 0.1096689
+    ## [1] 0.0293678 0.1353381 0.1059703
 
 ``` r
 # SE w/  fpc
 c(pi_hat_c-1.96*se.vect[2],pi_hat_c+1.96*se.vect[2], 2*1.96*se.vect[2])
 ```
 
-    ## [1] 0.04494915 0.14328614 0.09833699
+    ## [1] 0.03484266 0.12986322 0.09502055
 
 ``` r
 # SE new
 c(pi_hat_c-1.96*se.vect[3],pi_hat_c+1.96*se.vect[3], 2*1.96*se.vect[3])
 ```
 
-    ## [1] 0.04223922 0.14599607 0.10375685
+    ## [1] 0.03206976 0.13263612 0.10056636
 
 In addition to the wald type confidence interval calculated based on the
 standard errors estimated above, we introduced a Bayesian credible
@@ -156,7 +156,7 @@ BC_interval = RS_BC(N,n_pos.RS,n.RS,Se,Sp)
 c(BC_interval$BC_lower, BC_interval$BC_upper, BC_interval$BC_width)
 ```
 
-    ## [1] 0.04657319 0.15540825 0.10883506
+    ## [1] 0.03806355 0.13805190 0.09998835
 
 ## Simulation Studies
 
@@ -183,25 +183,25 @@ round(tmp[,],3)
 ```
 
     ##       p_case p_stream2 N_true RS.mean RS.sd RS.avgse RS.width RS.CIpct
-    ##  [1,]    0.1       0.1    0.1   0.101 0.054    0.055    0.215    91.98
-    ##  [2,]    0.1       0.3    0.1   0.099 0.031    0.030    0.117    94.08
-    ##  [3,]    0.1       0.5    0.1   0.100 0.021    0.022    0.085    95.16
-    ##  [4,]    0.3       0.1    0.3   0.301 0.074    0.074    0.289    94.20
-    ##  [5,]    0.3       0.3    0.3   0.300 0.039    0.039    0.154    95.44
-    ##  [6,]    0.3       0.5    0.3   0.300 0.028    0.027    0.108    94.78
-    ##  [7,]    0.5       0.1    0.5   0.500 0.080    0.080    0.314    94.66
-    ##  [8,]    0.5       0.3    0.5   0.500 0.042    0.042    0.166    94.84
-    ##  [9,]    0.5       0.5    0.5   0.500 0.030    0.030    0.116    95.34
+    ##  [1,]    0.1       0.1    0.1   0.098 0.053    0.054    0.213    91.44
+    ##  [2,]    0.1       0.3    0.1   0.100 0.030    0.030    0.117    94.56
+    ##  [3,]    0.1       0.5    0.1   0.100 0.022    0.022    0.085    94.42
+    ##  [4,]    0.3       0.1    0.3   0.300 0.073    0.074    0.289    95.14
+    ##  [5,]    0.3       0.3    0.3   0.300 0.040    0.039    0.154    95.22
+    ##  [6,]    0.3       0.5    0.3   0.300 0.027    0.027    0.108    94.76
+    ##  [7,]    0.5       0.1    0.5   0.502 0.080    0.080    0.314    94.38
+    ##  [8,]    0.5       0.3    0.5   0.500 0.042    0.042    0.166    94.82
+    ##  [9,]    0.5       0.5    0.5   0.500 0.029    0.030    0.116    95.48
     ##       RS.BC_width RS.BC_CIpct
-    ##  [1,]       0.205       95.32
-    ##  [2,]       0.116       94.28
-    ##  [3,]       0.084       95.28
-    ##  [4,]       0.282       94.46
-    ##  [5,]       0.152       95.16
-    ##  [6,]       0.107       94.50
-    ##  [7,]       0.305       95.22
-    ##  [8,]       0.164       94.94
-    ##  [9,]       0.115       95.00
+    ##  [1,]       0.204       95.20
+    ##  [2,]       0.116       94.74
+    ##  [3,]       0.084       94.64
+    ##  [4,]       0.281       95.24
+    ##  [5,]       0.152       95.08
+    ##  [6,]       0.107       94.56
+    ##  [7,]       0.305       94.90
+    ##  [8,]       0.164       94.88
+    ##  [9,]       0.115       94.94
 
 ## Including Figures
 
@@ -215,8 +215,7 @@ Sp = 0.95
 
 # observed imperfect testing sample
 n.RS=100
-n_pos.RS = 30
-p_case = (n_pos.RS/n.RS+Sp-1)/(Se+Sp-1)  # not a interger here
+p_case = 0.2  
 
 for(N_i in N_tmp){
     tmp = RS_SE_compare_main(N=N_i, p_case=p_case, p.RS=n.RS/N_i, Se=Se, Sp=Sp)  

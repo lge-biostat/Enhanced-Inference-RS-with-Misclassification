@@ -133,8 +133,7 @@ Sp = 0.95
 
 # observed imperfect testing sample
 n.RS=100
-n_pos.RS = 30
-p_case = (n_pos.RS/n.RS+Sp-1)/(Se+Sp-1)  # not a interger here
+p_case = 0.2  
 
 for(N_i in N_tmp){
     tmp = RS_SE_compare_main(N=N_i, p_case=p_case, p.RS=n.RS/N_i, Se=Se, Sp=Sp)  
